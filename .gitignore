@@ -1,0 +1,16 @@
+venv/
+.env/
+
+__pycache__/
+*.pyc
+*.pyo
+
+.streamlit/
+
+generated/
+*.docx
+!templates/offer_template.docx
+
+.DS_Store
+.vscode/
+*.log
