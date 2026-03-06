@@ -1,0 +1,5 @@
+site,latitude,longitude,client,equipment,year,status
+Bangalore Metro,12.9716,77.5946,BMRCL,Stationery Boom Placer,2023,working
+Chennai Tunnel,13.0827,80.2707,Chennai Metro,Shotcrete Machine,2022,completed
+Hyderabad Flyover,17.3850,78.4867,HMDA,Piling Rig,2024,working
+Delhi Project,28.6139,77.2090,DMRC,Shotcrete Machine,2021,completed

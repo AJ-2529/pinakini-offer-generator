@@ -143,3 +143,6 @@ streamlit
 docxtpl
 mammoth
 weasyprint
+streamlit
+pydeck
+pandas

@@ -1,12 +1,19 @@
 import streamlit as st
 from docxtpl import DocxTemplate
 import datetime
-
-# -----------------------------
-# PAGE CONFIG
-# -----------------------------
+import pandas as pd
+import pydeck as pdk
+import json
 
 st.set_page_config(page_title="Pinakini Infra", layout="centered")
+
+# -----------------------------
+# MAP SETTINGS (EDITABLE)
+# -----------------------------
+
+MAP_HEIGHT = 650
+MAP_ZOOM = 3.6
+DOT_SIZE = 28000
 
 # -----------------------------
 # SESSION STATES
@@ -15,11 +22,11 @@ st.set_page_config(page_title="Pinakini Infra", layout="centered")
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
-if "page" not in st.session_state:
-    st.session_state.page = "dashboard"
+if "section" not in st.session_state:
+    st.session_state.section = "offer_dashboard"
 
 # -----------------------------
-# CUSTOM CSS
+# CSS
 # -----------------------------
 
 st.markdown("""
@@ -35,13 +42,8 @@ body {
     text-align:center;
 }
 
-.white {
-    color:white;
-}
-
-.red {
-    color:#ff4b4b;
-}
+.white { color:white; }
+.red { color:#ff4b4b; }
 
 .login-text{
     font-size:30px;
@@ -55,38 +57,45 @@ body {
     margin-bottom:50px;
 }
 
-/* BIG EQUIPMENT CARDS */
-
-.card button{
-    background-color:#1f1f1f;
-    color:white;
-    border:1px solid #2a2a2a;
-    padding:70px 40px;
-    border-radius:18px;
-    font-size:24px;
-    font-weight:600;
-    width:100%;
-    height:200px;
-    transition:all 0.25s ease;
+.sidebar-title{
+    font-size:22px;
+    font-weight:700;
+    margin-bottom:20px;
 }
 
-.card button:hover{
-    transform:translateY(-10px);
-    border:1px solid #ff4b4b;
-    box-shadow:0px 12px 35px rgba(0,0,0,0.6);
+.sidebar-section{
+    font-size:12px;
+    letter-spacing:1px;
+    margin-top:25px;
+    margin-bottom:10px;
+    color:#9aa0a6;
+}
+
+.map-title{
+    text-align:center;
+    font-size:32px;
+    font-weight:600;
+    margin-bottom:20px;
+}
+
+.legend-fixed{
+    position:fixed;
+    bottom:40px;
+    right:40px;
+    font-size:16px;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 # -----------------------------
-# USERS FROM STREAMLIT SECRETS
+# USERS
 # -----------------------------
 
 users = dict(st.secrets["users"])
 
 # -----------------------------
-# LOGIN PAGE
+# LOGIN
 # -----------------------------
 
 if not st.session_state.logged_in:
@@ -117,10 +126,38 @@ if not st.session_state.logged_in:
     st.stop()
 
 # -----------------------------
+# SIDEBAR
+# -----------------------------
+
+with st.sidebar:
+
+    st.markdown('<div class="sidebar-title">Pinakini Infra</div>', unsafe_allow_html=True)
+
+    if st.button("Dashboard"):
+        st.session_state.section = "dashboard"
+        st.rerun()
+
+    st.markdown('<div class="sidebar-section">OFFERS</div>', unsafe_allow_html=True)
+
+    if st.button("Offer Dashboard"):
+        st.session_state.section = "offer_dashboard"
+        st.rerun()
+
+    if st.button("Offer History"):
+        st.session_state.section = "history"
+        st.rerun()
+
+    st.markdown('<div class="sidebar-section">SITES</div>', unsafe_allow_html=True)
+
+    if st.button("Sites"):
+        st.session_state.section = "sites"
+        st.rerun()
+
+# -----------------------------
 # DASHBOARD
 # -----------------------------
 
-if st.session_state.page == "dashboard":
+if st.session_state.section == "dashboard":
 
     st.markdown(f"""
     <div class="dashboard-title">
@@ -129,83 +166,85 @@ if st.session_state.page == "dashboard":
     </div>
     """, unsafe_allow_html=True)
 
+    st.info("Dashboard module coming soon.")
+
+# -----------------------------
+# OFFERS DASHBOARD
+# -----------------------------
+
+elif st.session_state.section == "offer_dashboard":
+
+    st.markdown("""
+    <div class="dashboard-title">
+    <span class="white">Create Offer</span>
+    </div>
+    """, unsafe_allow_html=True)
+
     col1, col2, col3 = st.columns(3)
 
     with col1:
         if st.button("Piling Rig"):
-            st.session_state.page = "piling"
+            st.session_state.section = "piling"
             st.rerun()
 
     with col2:
         if st.button("Shotcrete"):
-            st.session_state.page = "shotcrete"
+            st.session_state.section = "shotcrete"
             st.rerun()
 
     with col3:
         if st.button("Stationery Boom Placer"):
-            st.session_state.page = "boom"
+            st.session_state.section = "boom"
             st.rerun()
 
 # -----------------------------
-# PILING RIG PAGE
+# PILING RIG
 # -----------------------------
 
-elif st.session_state.page == "piling":
+elif st.session_state.section == "piling":
 
-    if st.button("← Back"):
-        st.session_state.page = "dashboard"
+    if st.button("← Back to Offers"):
+        st.session_state.section = "offer_dashboard"
         st.rerun()
 
     st.title("Piling Rig Offer Generator")
-    st.info("Equipment Offer Generator Coming Soon")
+    st.info("Coming Soon")
 
 # -----------------------------
-# SHOTCRETE PAGE
+# SHOTCRETE
 # -----------------------------
 
-elif st.session_state.page == "shotcrete":
+elif st.session_state.section == "shotcrete":
 
-    if st.button("← Back"):
-        st.session_state.page = "dashboard"
+    if st.button("← Back to Offers"):
+        st.session_state.section = "offer_dashboard"
         st.rerun()
 
     st.title("Shotcrete Offer Generator")
-    st.info("Equipment Offer Generator Coming Soon")
+    st.info("Coming Soon")
 
 # -----------------------------
 # BOOM PLACER GENERATOR
 # -----------------------------
 
-elif st.session_state.page == "boom":
+elif st.session_state.section == "boom":
 
-    if st.button("← Back"):
-        st.session_state.page = "dashboard"
+    if st.button("← Back to Offers"):
+        st.session_state.section = "offer_dashboard"
         st.rerun()
 
     st.title("Stationery Boom Placer Offer Generator")
 
     date = st.date_input("Date")
-
     address = st.text_area("To Address")
-
     gstn = st.text_input("GSTN")
-
     contact = st.text_input("Contact")
-
     email = st.text_input("Email")
-
     quantity = st.number_input("Number of Boom Placers", min_value=1)
-
     location = st.text_input("Location")
-
     rate = st.text_input("Monthly Rate (INR)")
 
-    # -----------------------------
-    # INDIAN NUMBER FORMAT
-    # -----------------------------
-
     def indian_format(num):
-
         try:
             num = int(num)
         except:
@@ -229,10 +268,6 @@ elif st.session_state.page == "boom":
             parts.insert(0, rest)
 
         return ",".join(parts) + "," + last3
-
-    # -----------------------------
-    # GENERATE OFFER LETTER
-    # -----------------------------
 
     if st.button("Generate Offer Letter"):
 
@@ -266,4 +301,89 @@ elif st.session_state.page == "boom":
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             )
 
-        st.success("Offer Letter Generated Successfully!")
+# -----------------------------
+# SITES MAP
+# -----------------------------
+
+elif st.session_state.section == "sites":
+
+    st.markdown("""
+    <div class="map-title">
+    <span class="white">Pinakini Infra </span>
+    <span class="red">Sites</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+    data = pd.read_csv("sites.csv")
+
+    with open("countries.geojson") as f:
+        world = json.load(f)
+
+    india_geo = {
+        "type": "FeatureCollection",
+        "features": [
+            feature for feature in world["features"]
+            if feature["properties"].get("name") == "India"
+        ],
+    }
+
+    india_layer = pdk.Layer(
+        "GeoJsonLayer",
+        india_geo,
+        stroked=True,
+        filled=False,
+        get_line_color=[255,255,255],
+        line_width_min_pixels=2,
+    )
+
+    data["color"] = data["status"].apply(
+        lambda x: [255,0,0] if x=="working" else [0,255,0]
+    )
+
+    sites_layer = pdk.Layer(
+        "ScatterplotLayer",
+        data,
+        get_position="[longitude, latitude]",
+        get_color="color",
+        get_radius=DOT_SIZE,
+        pickable=True,
+    )
+
+    view_state = pdk.ViewState(
+        latitude=22.5937,
+        longitude=78.9629,
+        zoom=MAP_ZOOM,
+    )
+
+    deck = pdk.Deck(
+        layers=[india_layer, sites_layer],
+        initial_view_state=view_state,
+        map_style="mapbox://styles/mapbox/dark-v10",
+        tooltip={
+            "html": """
+            <b>{site}</b><br/>
+            Client: {client}<br/>
+            Equipment: {equipment}<br/>
+            Year: {year}<br/>
+            Status: {status}
+            """
+        }
+    )
+
+    st.pydeck_chart(deck, height=MAP_HEIGHT)
+
+    st.markdown("""
+    <div class="legend-fixed">
+    🔴 Working Site<br>
+    🟢 Completed Site
+    </div>
+    """, unsafe_allow_html=True)
+
+# -----------------------------
+# OFFER HISTORY
+# -----------------------------
+
+elif st.session_state.section == "history":
+
+    st.title("Offer History")
+    st.info("Offer history will appear here later.")
